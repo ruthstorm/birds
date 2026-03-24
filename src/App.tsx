@@ -1,101 +1,132 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { useState } from "react"
+import { fetchTopBirds } from "@/api"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { TopBirdsResponse } from "@/types"
 
 export default function App() {
-  return (
-    <main className="min-h-screen bg-background text-foreground p-8 max-w-2xl mx-auto space-y-10">
+  const [city, setCity] = useState("")
+  const [state, setState] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [result, setResult] = useState<TopBirdsResponse | null>(null)
 
-      <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Component Preview</h1>
-        <p className="text-muted-foreground text-sm">Tailwind + shadcn/ui — Nova theme</p>
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    setResult(null)
+    setLoading(true)
+
+    try {
+      const data = await fetchTopBirds(city.trim(), state.trim().toUpperCase())
+      setResult(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-background text-foreground p-6 max-w-6xl mx-auto">
+      <div className="max-w-2xl space-y-2 mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Birds Near You</h1>
+        <p className="text-muted-foreground">
+          Enter a city and state or province in North America to find the 5 most common birds from recent nearby eBird observations.
+        </p>
       </div>
 
-      {/* Buttons */}
-      <section className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Buttons</h2>
-        <div className="flex flex-wrap gap-3">
-          <Button>Primary</Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="outline">Outline</Button>
-          <Button variant="ghost">Ghost</Button>
-          <Button variant="destructive">Destructive</Button>
-          <Button disabled>Disabled</Button>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-[1fr_120px_auto] gap-3 items-end mb-8 max-w-2xl">
+        <div className="space-y-1">
+          <label className="text-sm font-medium">City</label>
+          <Input
+            placeholder="Austin"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            required
+          />
         </div>
-      </section>
 
-      {/* Inputs */}
-      <section className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Inputs</h2>
-        <div className="flex gap-3">
-          <Input placeholder="City" className="flex-1" />
-          <Input placeholder="ST" className="w-20 uppercase" maxLength={2} />
-          <Button>Search</Button>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">State</label>
+          <Input
+            placeholder="TX"
+            value={state}
+            onChange={(e) => setState(e.target.value.toUpperCase())}
+            maxLength={2}
+            required
+          />
         </div>
-      </section>
 
-      {/* Badges */}
-      <section className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Badges</h2>
-        <div className="flex flex-wrap gap-2">
-          <Badge>#1</Badge>
-          <Badge variant="secondary">#2</Badge>
-          <Badge variant="outline">#3</Badge>
-          <Badge variant="destructive">Error</Badge>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Searching..." : "Search"}
+        </Button>
+      </form>
+
+      {error && (
+        <div className="mb-6 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
         </div>
-      </section>
+      )}
 
-      {/* Card */}
-      <section className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Card</h2>
-        <Card className="overflow-hidden w-56">
-          <div className="h-36 bg-muted flex items-center justify-center text-muted-foreground text-sm">
-            No bird photo
-          </div>
-          <CardHeader className="pb-1">
-            <div className="flex items-start justify-between">
-              <CardTitle className="text-base">American Robin</CardTitle>
-              <Badge variant="secondary">#1</Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground italic">Turdus migratorius</p>
-            <p className="text-sm text-muted-foreground mt-1">34 sightings</p>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Skeletons */}
-      <section className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Skeleton (loading state)</h2>
-        <div className="flex gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="space-y-2 w-40">
-              <Skeleton className="h-28 w-full rounded-lg" />
-              <Skeleton className="h-3 w-3/4" />
+      {loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, idx) => (
+            <div key={idx} className="space-y-2">
+              <Skeleton className="h-44 w-full rounded-lg" />
+              <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>
           ))}
         </div>
-      </section>
+      )}
 
-      {/* Typography & color tokens */}
-      <section className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Typography / tokens</h2>
-        <p className="text-foreground font-bold text-lg">Foreground bold</p>
-        <p className="text-muted-foreground">Muted foreground</p>
-        <p className="text-destructive">Destructive</p>
-        <div className="flex gap-2 mt-2">
-          <div className="w-8 h-8 rounded bg-primary" title="primary" />
-          <div className="w-8 h-8 rounded bg-secondary border" title="secondary" />
-          <div className="w-8 h-8 rounded bg-muted border" title="muted" />
-          <div className="w-8 h-8 rounded bg-destructive" title="destructive" />
-          <div className="w-8 h-8 rounded bg-card border" title="card" />
-        </div>
-      </section>
+      {result && !loading && (
+        <section className="space-y-4">
+          <div className="text-sm text-muted-foreground">
+            Showing top 5 birds from {result.totalObservations} observations near {result.location.city}, {" "}
+            {result.location.state} within {result.searchWindow.radiusKm} km over the last {result.searchWindow.days} days.
+          </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            {result.birds.map((bird, index) => (
+              <Card key={bird.speciesCode ?? bird.commonName} className="overflow-hidden h-full">
+                {bird.imageUrl ? (
+                  <img
+                    src={bird.imageUrl}
+                    alt={bird.commonName}
+                    className="h-44 w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="h-44 w-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
+                    No bird photo
+                  </div>
+                )}
+
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-base leading-tight">{bird.commonName}</CardTitle>
+                    <Badge variant="secondary">#{index + 1}</Badge>
+                  </div>
+                </CardHeader>
+
+                <CardContent className="pt-0 space-y-1">
+                  {bird.scientificName && (
+                    <p className="text-xs italic text-muted-foreground">{bird.scientificName}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    {bird.sightings} sighting{bird.sightings === 1 ? "" : "s"}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
     </main>
   )
 }
