@@ -4,7 +4,7 @@ Birds Near You is a portfolio project focused on practical API orchestration and
 
 Given a city and state/province, the app returns the five most commonly observed birds nearby, using real-world observation data from eBird and image enrichment from Wikipedia.
 
-**[Live Site](https://ruthstorm.github.io/birds/)**
+**[Demo](https://ruthstorm.github.io/birds/)**
 
 ## Project goals
 
