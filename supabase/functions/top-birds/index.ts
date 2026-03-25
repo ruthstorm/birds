@@ -9,6 +9,7 @@ if (!EBIRD_API_KEY) {
 const ALLOWED_ORIGINS = [
   "http://localhost:5173",
   "http://localhost:4173",
+  "https://ruthstorm.github.io",
 ]
 
 const DEFAULT_DAYS = 30
@@ -26,9 +27,9 @@ interface Bird {
 }
 
 function corsHeaders(origin: string | null) {
-  const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]
+  const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : null
   return {
-    "Access-Control-Allow-Origin": allowed,
+    ...(allowed ? { "Access-Control-Allow-Origin": allowed } : {}),
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
   }
