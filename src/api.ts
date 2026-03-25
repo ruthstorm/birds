@@ -4,7 +4,7 @@ const FUNCTION_URL = import.meta.env.VITE_TOP_BIRDS_FUNCTION_URL as string
 
 export async function fetchTopBirds(city: string, state: string): Promise<TopBirdsResponse> {
   if (!FUNCTION_URL) {
-    throw new Error("Missing VITE_TOP_BIRDS_FUNCTION_URL in .env.local")
+    throw new Error("Missing VITE_TOP_BIRDS_FUNCTION_URL")
   }
 
   const url = new URL(FUNCTION_URL)
