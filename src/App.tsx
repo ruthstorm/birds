@@ -118,9 +118,6 @@ export default function App() {
                   {bird.scientificName && (
                     <p className="text-xs italic text-muted-foreground">{bird.scientificName}</p>
                   )}
-                  <p className="text-sm text-muted-foreground">
-                    {bird.sightings} sighting{bird.sightings === 1 ? "" : "s"}
-                  </p>
                 </CardContent>
               </Card>
             ))}

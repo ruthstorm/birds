@@ -121,7 +121,7 @@ async function addBirdImages(birds: Bird[]): Promise<Bird[]> {
   )
 }
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: { headers: { get: (arg0: string) => any }; method: string; url: string | URL }) => {
   const origin = req.headers.get("origin")
   const headers = corsHeaders(origin)
 
