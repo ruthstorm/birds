@@ -94,13 +94,50 @@ export default function App() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {result.birds.map((bird, index) => (
               <Card key={bird.speciesCode ?? bird.commonName} className="overflow-hidden h-full">
-                {bird.imageUrl ? (
-                  <img
-                    src={bird.imageUrl}
-                    alt={bird.commonName}
-                    className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full object-cover object-top xl:object-center"
-                    loading="lazy"
-                  />
+                {bird.image ? (
+                  <div className="relative">
+                    <img
+                      src={bird.image.url}
+                      alt={bird.commonName}
+                      className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full object-cover object-top xl:object-center"
+                      loading="lazy"
+                    />
+                    <p className="bg-black/60 text-white text-[10px] leading-tight px-2 py-1 absolute bottom-0 inset-x-0">
+                      Photo:{" "}
+                      {bird.image.artist ? (
+                        <a
+                          href={bird.image.sourcePageUrl}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="underline hover:no-underline"
+                        >
+                          {bird.image.artist}
+                        </a>
+                      ) : (
+                        <a
+                          href={bird.image.sourcePageUrl}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="underline hover:no-underline"
+                        >
+                          Wikimedia Commons
+                        </a>
+                      )}
+                      {" · "}
+                      {bird.image.licenseUrl ? (
+                        <a
+                          href={bird.image.licenseUrl}
+                          target="_blank"
+                          rel="noopener noreferrer nofollow"
+                          className="underline hover:no-underline"
+                        >
+                          {bird.image.licenseShortName}
+                        </a>
+                      ) : (
+                        bird.image.licenseShortName
+                      )}
+                    </p>
+                  </div>
                 ) : (
                   <div className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
                     No bird photo

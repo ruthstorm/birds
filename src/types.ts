@@ -1,9 +1,17 @@
+export interface BirdImage {
+  url: string
+  artist: string | null
+  licenseShortName: string
+  licenseUrl: string | null
+  sourcePageUrl: string
+}
+
 export interface BirdResult {
   commonName: string
   scientificName: string | null
   speciesCode: string | null
   sightings: number
-  imageUrl: string | null
+  image: BirdImage | null
 }
 
 export interface TopBirdsResponse {
