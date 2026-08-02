@@ -34,8 +34,8 @@ All upstream calls run through a Supabase Edge Function so `EBIRD_API_KEY` stays
 3. Function geocodes location with Nominatim.
 4. Function requests recent geo observations from eBird.
 5. Function groups observations by species and returns top five by sightings.
-6. Function fetches bird images from Wikipedia with fallback from scientific name to common name.
-7. Frontend renders ranked cards with loading and error states.
+6. Function finds each bird's Wikipedia lead image, verifies it's hosted on Wikimedia Commons under an allowed open license, and fetches its attribution metadata. Falls back from scientific name to common name, and skips the image entirely if no verified-license Commons file is found.
+7. Frontend renders ranked cards with loading and error states, including a visible attribution caption (photographer/uploader and license, linked to source) on every displayed image.
 
 ## Behavior and defaults
 
@@ -43,6 +43,15 @@ All upstream calls run through a Supabase Edge Function so `EBIRD_API_KEY` stays
 2. Default search radius: 25 km
 3. Default eBird max results: 500
 4. Input validation and clear error responses for invalid requests
+
+## Image licensing and attribution
+
+Bird photos are only shown when their license can be verified:
+
+1. The function resolves each species to its Wikipedia article's lead image, then checks whether that image is hosted on Wikimedia Commons (not a local, non-free "fair use" upload).
+2. It queries the Commons API for the file's `extmetadata` and checks the license against an allow-list (`CC0`, `CC BY`, `CC BY-SA`, `Public domain`, `GFDL`, matched by substring).
+3. If the image isn't Commons-hosted, isn't found, or isn't under an allowed license, no image is shown for that bird — the card falls back to the "No bird photo" state rather than displaying unverified or non-free content.
+4. Verified images are returned with `artist`, `licenseShortName`, `licenseUrl`, and `sourcePageUrl`, and the frontend renders this as a caption directly on the image (linking to the source page and license), so attribution travels with the photo every time it's displayed.
 
 ## Environment setup
 
