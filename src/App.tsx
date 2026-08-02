@@ -93,7 +93,7 @@ export default function App() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {result.birds.map((bird, index) => (
-              <Card key={bird.speciesCode ?? bird.commonName} className="overflow-hidden h-full">
+              <Card key={bird.speciesCode ?? bird.commonName} className="overflow-hidden h-full pt-0">
                 {bird.image ? (
                   <div className="relative">
                     <img
