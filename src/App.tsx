@@ -98,7 +98,7 @@ export default function App() {
                   <img
                     src={bird.imageUrl}
                     alt={bird.commonName}
-                    className="h-44 w-full object-cover"
+                    className="h-44 w-full object-cover object-top xl:object-center"
                     loading="lazy"
                   />
                 ) : (
