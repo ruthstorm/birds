@@ -76,7 +76,7 @@ export default function App() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {Array.from({ length: 5 }).map((_, idx) => (
             <div key={idx} className="space-y-2">
-              <Skeleton className="h-44 w-full rounded-lg" />
+              <Skeleton className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full rounded-lg" />
               <Skeleton className="h-4 w-3/4" />
               <Skeleton className="h-3 w-1/2" />
             </div>
@@ -98,11 +98,11 @@ export default function App() {
                   <img
                     src={bird.imageUrl}
                     alt={bird.commonName}
-                    className="h-44 w-full object-cover object-top xl:object-center"
+                    className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full object-cover object-top xl:object-center"
                     loading="lazy"
                   />
                 ) : (
-                  <div className="h-44 w-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
+                  <div className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
                     No bird photo
                   </div>
                 )}
