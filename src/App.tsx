@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { fetchTopBirds } from "@/api"
+import { Footer } from "@/components/Footer"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,137 +32,140 @@ export default function App() {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground p-6 max-w-6xl mx-auto">
-      <div className="max-w-2xl space-y-2 mb-8">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Birds Near You</h1>
-        <p className="text-muted-foreground">
-          Enter a city and state or province in North America to find the 5 most common birds from recent nearby eBird observations.
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-[1fr_120px_auto] gap-3 items-end mb-8 max-w-2xl">
-        <div className="space-y-1">
-          <label className="text-sm font-medium">City</label>
-          <Input
-            placeholder="Austin"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            required
-          />
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
+      <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
+        <div className="max-w-2xl space-y-2 mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Birds Near You</h1>
+          <p className="text-muted-foreground">
+            Enter a city and state or province in North America to find the 5 most common birds from recent nearby eBird observations.
+          </p>
         </div>
 
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Province / State</label>
-          <Input
-            placeholder="TX"
-            value={state}
-            onChange={(e) => setState(e.target.value.toUpperCase())}
-            maxLength={2}
-            required
-          />
-        </div>
-
-        <Button type="submit" disabled={loading}>
-          {loading ? "Searching..." : "Search"}
-        </Button>
-      </form>
-
-      {error && (
-        <div className="mb-6 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
-
-      {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-          {Array.from({ length: 5 }).map((_, idx) => (
-            <div key={idx} className="space-y-2">
-              <Skeleton className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full rounded-lg" />
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {result && !loading && (
-        <section className="space-y-4">
-          <div className="text-sm text-muted-foreground">
-            Showing top 5 birds from {result.totalObservations} observations near {result.location.city}, {" "}
-            {result.location.state} within {result.searchWindow.radiusKm} km over the last {result.searchWindow.days} days.
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-[1fr_120px_auto] gap-3 items-end mb-8 max-w-2xl">
+          <div className="space-y-1">
+            <label className="text-sm font-medium">City</label>
+            <Input
+              placeholder="Austin"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              required
+            />
           </div>
 
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Province / State</label>
+            <Input
+              placeholder="TX"
+              value={state}
+              onChange={(e) => setState(e.target.value.toUpperCase())}
+              maxLength={2}
+              required
+            />
+          </div>
+
+          <Button type="submit" disabled={loading}>
+            {loading ? "Searching..." : "Search"}
+          </Button>
+        </form>
+
+        {error && (
+          <div className="mb-6 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
+        {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {result.birds.map((bird, index) => (
-              <Card key={bird.speciesCode ?? bird.commonName} className="overflow-hidden h-full pt-0">
-                {bird.image ? (
-                  <div className="relative">
-                    <img
-                      src={bird.image.url}
-                      alt={bird.commonName}
-                      className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full object-cover object-top xl:object-center"
-                      loading="lazy"
-                    />
-                    <p className="bg-black/60 text-white text-[10px] leading-tight px-2 py-1 absolute bottom-0 inset-x-0">
-                      Photo:{" "}
-                      {bird.image.artist ? (
-                        <a
-                          href={bird.image.sourcePageUrl}
-                          target="_blank"
-                          rel="noopener noreferrer nofollow"
-                          className="underline hover:no-underline"
-                        >
-                          {bird.image.artist}
-                        </a>
-                      ) : (
-                        <a
-                          href={bird.image.sourcePageUrl}
-                          target="_blank"
-                          rel="noopener noreferrer nofollow"
-                          className="underline hover:no-underline"
-                        >
-                          Wikimedia Commons
-                        </a>
-                      )}
-                      {" · "}
-                      {bird.image.licenseUrl ? (
-                        <a
-                          href={bird.image.licenseUrl}
-                          target="_blank"
-                          rel="noopener noreferrer nofollow"
-                          className="underline hover:no-underline"
-                        >
-                          {bird.image.licenseShortName}
-                        </a>
-                      ) : (
-                        bird.image.licenseShortName
-                      )}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
-                    No bird photo
-                  </div>
-                )}
-
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-base leading-tight">{bird.commonName}</CardTitle>
-                    <Badge variant="secondary">#{index + 1}</Badge>
-                  </div>
-                </CardHeader>
-
-                <CardContent className="pt-0 space-y-1">
-                  {bird.scientificName && (
-                    <p className="text-xs italic text-muted-foreground">{bird.scientificName}</p>
-                  )}
-                </CardContent>
-              </Card>
+            {Array.from({ length: 5 }).map((_, idx) => (
+              <div key={idx} className="space-y-2">
+                <Skeleton className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full rounded-lg" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
             ))}
           </div>
-        </section>
-      )}
-    </main>
+        )}
+
+        {result && !loading && (
+          <section className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Showing top 5 birds from {result.totalObservations} observations near {result.location.city}, {" "}
+              {result.location.state} within {result.searchWindow.radiusKm} km over the last {result.searchWindow.days} days.
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              {result.birds.map((bird, index) => (
+                <Card key={bird.speciesCode ?? bird.commonName} className="overflow-hidden h-full pt-0">
+                  {bird.image ? (
+                    <div className="relative">
+                      <img
+                        src={bird.image.url}
+                        alt={bird.commonName}
+                        className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full object-cover object-top xl:object-center"
+                        loading="lazy"
+                      />
+                      <p className="bg-black/60 text-white text-[10px] leading-tight px-2 py-1 absolute bottom-0 inset-x-0">
+                        Photo:{" "}
+                        {bird.image.artist ? (
+                          <a
+                            href={bird.image.sourcePageUrl}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                            className="underline hover:no-underline"
+                          >
+                            {bird.image.artist}
+                          </a>
+                        ) : (
+                          <a
+                            href={bird.image.sourcePageUrl}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                            className="underline hover:no-underline"
+                          >
+                            Wikimedia Commons
+                          </a>
+                        )}
+                        {" · "}
+                        {bird.image.licenseUrl ? (
+                          <a
+                            href={bird.image.licenseUrl}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow"
+                            className="underline hover:no-underline"
+                          >
+                            {bird.image.licenseShortName}
+                          </a>
+                        ) : (
+                          bird.image.licenseShortName
+                        )}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full bg-muted flex items-center justify-center text-sm text-muted-foreground">
+                      No bird photo
+                    </div>
+                  )}
+
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <CardTitle className="text-base leading-tight">{bird.commonName}</CardTitle>
+                      <Badge variant="secondary">#{index + 1}</Badge>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="pt-0 space-y-1">
+                    {bird.scientificName && (
+                      <p className="text-xs italic text-muted-foreground">{bird.scientificName}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
+      <Footer />
+    </div>
   )
 }
 
