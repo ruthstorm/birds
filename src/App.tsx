@@ -51,7 +51,7 @@ export default function App() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-sm font-medium">State</label>
+          <label className="text-sm font-medium">Province / State</label>
           <Input
             placeholder="TX"
             value={state}
