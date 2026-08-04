@@ -43,8 +43,9 @@ export default function App() {
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-[1fr_120px_auto] gap-3 items-end mb-8 max-w-2xl">
           <div className="space-y-1">
-            <label className="text-sm font-medium">City</label>
-            <Input
+            <label htmlFor="city" className="text-sm font-medium">City</label>
+            <Input 
+              id="city"
               placeholder="Austin"
               value={city}
               onChange={(e) => setCity(e.target.value)}
@@ -53,8 +54,9 @@ export default function App() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium">Province / State</label>
-            <Input
+            <label htmlFor="region" className="text-sm font-medium">Province / State</label>
+             <Input 
+              id="region"
               placeholder="TX"
               value={state}
               onChange={(e) => setState(e.target.value.toUpperCase())}
