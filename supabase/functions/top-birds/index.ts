@@ -205,7 +205,11 @@ async function geocode(city: string, state: string): Promise<{ lat: number; lng:
         place.country_code === region.countryCode &&
         place.admin1?.toLowerCase() === region.admin1.toLowerCase(),
     )
-    .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
+    .sort((a, b) => {
+      const aExact = a.name.trim().toLowerCase() === city.trim().toLowerCase()
+      const bExact = b.name.trim().toLowerCase() === city.trim().toLowerCase()
+      return Number(bExact) - Number(aExact) || (b.population ?? 0) - (a.population ?? 0)
+    })
 
   const place = matches[0]
   if (!place) throw new Error(`Location not found: ${city}, ${state}`)
