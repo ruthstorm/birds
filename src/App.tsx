@@ -37,7 +37,7 @@ export default function App() {
         <div className="max-w-2xl space-y-2 mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">Birds Near You</h1>
           <p className="text-muted-foreground">
-            Enter a city and state or province in North America to find the 5 most common birds from recent nearby eBird observations.
+            Enter a city and state or province in North America to find the 10 most common birds from recent nearby eBird observations.
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export default function App() {
 
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-            {Array.from({ length: 5 }).map((_, idx) => (
+            {Array.from({ length: 10 }).map((_, idx) => (
               <div key={idx} className="space-y-2">
                 <Skeleton className="h-64 sm:h-56 lg:h-48 xl:h-44 w-full rounded-lg" />
                 <Skeleton className="h-4 w-3/4" />
@@ -91,7 +91,7 @@ export default function App() {
         {result && !loading && (
           <section className="space-y-4">
             <div className="text-sm text-muted-foreground">
-              Showing top 5 birds from {result.totalObservations} observations near {result.location.city}, {" "}
+              Showing top 10 birds from {result.totalObservations} observations near {result.location.city}, {" "}
               {result.location.state} within {result.searchWindow.radiusKm} km over the last {result.searchWindow.days} days.
             </div>
 

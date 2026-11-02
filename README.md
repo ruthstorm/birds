@@ -2,7 +2,7 @@
 
 Birds Near You is a portfolio project focused on practical API orchestration and clean frontend UX.
 
-Given a city and state/province, the app returns the five most commonly observed birds nearby, using real-world observation data from eBird and image enrichment from Wikipedia.
+Given a city and state/province, the app returns the ten most commonly observed birds nearby, using real-world observation data from eBird and image enrichment from Wikipedia.
 
 **[Demo](https://ruthstorm.github.io/birds/)**
 
@@ -19,7 +19,7 @@ Given a city and state/province, the app returns the five most commonly observed
 1. Frontend: React, Vite, TypeScript
 2. UI: Tailwind CSS, shadcn/ui
 3. Backend: Supabase Edge Functions
-4. External APIs: eBird, OpenStreetMap Nominatim, Wikipedia Summary API
+4. External APIs: eBird, Open-Meteo Geocoding, Wikipedia Summary API
 
 ## Why this architecture
 
@@ -31,9 +31,9 @@ All upstream calls run through a Supabase Edge Function so `EBIRD_API_KEY` stays
 
 1. User submits city and state/province from the React app.
 2. Frontend calls the hosted `top-birds` Edge Function.
-3. Function geocodes location with Nominatim.
+3. Function geocodes the city with Open-Meteo, then keeps the match for the submitted US state or Canadian province.
 4. Function requests recent geo observations from eBird.
-5. Function groups observations by species and returns top five by sightings.
+5. Function groups observations by species and returns top ten by sightings.
 6. Function finds each bird's Wikipedia lead image, verifies it's hosted on Wikimedia Commons under an allowed open license, and fetches its attribution metadata. Falls back from scientific name to common name, and skips the image entirely if no verified-license Commons file is found.
 7. Frontend renders ranked cards with loading and error states, including a visible attribution caption (photographer/uploader and license, linked to source) on every displayed image.
 
@@ -95,6 +95,14 @@ Expected result:
 1. 200 with JSON payload including location metadata and top bird list
 2. 400 for invalid/missing input
 3. 500 for upstream provider failures
+
+## Case study: the geocoder that started failing
+
+Search began returning "Geocoding request failed." The failure was inside the first upstream call.
+
+The function sent one request per search to the public Nominatim server, always appending `, USA`, and turned any non-200 into that generic 500. Nominatim is a donated service for the OpenStreetMap website. It blocks shared cloud addresses when traffic from that address breaks its usage policy (about one request per second, or a User-Agent that does not identify the application). This app only geocodes when someone searches, so the block was on the egress address shared by Supabase Edge Functions, not on this project's own volume.
+
+Geocoding now uses the Open-Meteo geocoding API, which allows this server-side call and needs no key. The function maps the two-letter state or province code to Open-Meteo's full region name and country, so a Canadian city resolves instead of being forced into the United States. If Open-Meteo itself fails, the error includes the HTTP status. eBird stays behind the function, so that API key remains in Supabase secrets.
 
 ## What this project demonstrates
 
