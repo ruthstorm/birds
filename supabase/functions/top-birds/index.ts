@@ -258,7 +258,7 @@ function topBirdsFromObservations(observations: Array<{ comName: string; sciName
   }
   return [...counts.values()]
     .sort((a, b) => b.sightings - a.sightings)
-    .slice(0, 5)
+    .slice(0, 10)
 }
 
 async function fetchWikipediaThumbnailUrl(title: string): Promise<string | null> {

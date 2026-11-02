@@ -2,7 +2,7 @@
 
 Birds Near You is a portfolio project focused on practical API orchestration and clean frontend UX.
 
-Given a city and state/province, the app returns the five most commonly observed birds nearby, using real-world observation data from eBird and image enrichment from Wikipedia.
+Given a city and state/province, the app returns the ten most commonly observed birds nearby, using real-world observation data from eBird and image enrichment from Wikipedia.
 
 **[Demo](https://ruthstorm.github.io/birds/)**
 
@@ -33,7 +33,7 @@ All upstream calls run through a Supabase Edge Function so `EBIRD_API_KEY` stays
 2. Frontend calls the hosted `top-birds` Edge Function.
 3. Function geocodes the city with Open-Meteo, then keeps the match for the submitted US state or Canadian province.
 4. Function requests recent geo observations from eBird.
-5. Function groups observations by species and returns top five by sightings.
+5. Function groups observations by species and returns top ten by sightings.
 6. Function finds each bird's Wikipedia lead image, verifies it's hosted on Wikimedia Commons under an allowed open license, and fetches its attribution metadata. Falls back from scientific name to common name, and skips the image entirely if no verified-license Commons file is found.
 7. Frontend renders ranked cards with loading and error states, including a visible attribution caption (photographer/uploader and license, linked to source) on every displayed image.
 
