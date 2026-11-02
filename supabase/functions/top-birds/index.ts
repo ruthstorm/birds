@@ -32,7 +32,83 @@ const DEFAULT_DAYS = 30
 const DEFAULT_RADIUS_KM = 25
 const DEFAULT_MAX_RESULTS = 500
 
-const DEPLOY_MARKER = "top-birds-debug-2026-03-24-r1"
+// Open-Meteo returns admin1 as a full name. The form submits a 2-letter code.
+const REGIONS: Record<string, { countryCode: string; admin1: string }> = {
+  AL: { countryCode: "US", admin1: "Alabama" },
+  AK: { countryCode: "US", admin1: "Alaska" },
+  AZ: { countryCode: "US", admin1: "Arizona" },
+  AR: { countryCode: "US", admin1: "Arkansas" },
+  CA: { countryCode: "US", admin1: "California" },
+  CO: { countryCode: "US", admin1: "Colorado" },
+  CT: { countryCode: "US", admin1: "Connecticut" },
+  DE: { countryCode: "US", admin1: "Delaware" },
+  DC: { countryCode: "US", admin1: "District of Columbia" },
+  FL: { countryCode: "US", admin1: "Florida" },
+  GA: { countryCode: "US", admin1: "Georgia" },
+  HI: { countryCode: "US", admin1: "Hawaii" },
+  ID: { countryCode: "US", admin1: "Idaho" },
+  IL: { countryCode: "US", admin1: "Illinois" },
+  IN: { countryCode: "US", admin1: "Indiana" },
+  IA: { countryCode: "US", admin1: "Iowa" },
+  KS: { countryCode: "US", admin1: "Kansas" },
+  KY: { countryCode: "US", admin1: "Kentucky" },
+  LA: { countryCode: "US", admin1: "Louisiana" },
+  ME: { countryCode: "US", admin1: "Maine" },
+  MD: { countryCode: "US", admin1: "Maryland" },
+  MA: { countryCode: "US", admin1: "Massachusetts" },
+  MI: { countryCode: "US", admin1: "Michigan" },
+  MN: { countryCode: "US", admin1: "Minnesota" },
+  MS: { countryCode: "US", admin1: "Mississippi" },
+  MO: { countryCode: "US", admin1: "Missouri" },
+  MT: { countryCode: "US", admin1: "Montana" },
+  NE: { countryCode: "US", admin1: "Nebraska" },
+  NV: { countryCode: "US", admin1: "Nevada" },
+  NH: { countryCode: "US", admin1: "New Hampshire" },
+  NJ: { countryCode: "US", admin1: "New Jersey" },
+  NM: { countryCode: "US", admin1: "New Mexico" },
+  NY: { countryCode: "US", admin1: "New York" },
+  NC: { countryCode: "US", admin1: "North Carolina" },
+  ND: { countryCode: "US", admin1: "North Dakota" },
+  OH: { countryCode: "US", admin1: "Ohio" },
+  OK: { countryCode: "US", admin1: "Oklahoma" },
+  OR: { countryCode: "US", admin1: "Oregon" },
+  PA: { countryCode: "US", admin1: "Pennsylvania" },
+  RI: { countryCode: "US", admin1: "Rhode Island" },
+  SC: { countryCode: "US", admin1: "South Carolina" },
+  SD: { countryCode: "US", admin1: "South Dakota" },
+  TN: { countryCode: "US", admin1: "Tennessee" },
+  TX: { countryCode: "US", admin1: "Texas" },
+  UT: { countryCode: "US", admin1: "Utah" },
+  VT: { countryCode: "US", admin1: "Vermont" },
+  VA: { countryCode: "US", admin1: "Virginia" },
+  WA: { countryCode: "US", admin1: "Washington" },
+  WV: { countryCode: "US", admin1: "West Virginia" },
+  WI: { countryCode: "US", admin1: "Wisconsin" },
+  WY: { countryCode: "US", admin1: "Wyoming" },
+  AB: { countryCode: "CA", admin1: "Alberta" },
+  BC: { countryCode: "CA", admin1: "British Columbia" },
+  MB: { countryCode: "CA", admin1: "Manitoba" },
+  NB: { countryCode: "CA", admin1: "New Brunswick" },
+  NL: { countryCode: "CA", admin1: "Newfoundland and Labrador" },
+  NS: { countryCode: "CA", admin1: "Nova Scotia" },
+  NT: { countryCode: "CA", admin1: "Northwest Territories" },
+  NU: { countryCode: "CA", admin1: "Nunavut" },
+  ON: { countryCode: "CA", admin1: "Ontario" },
+  PE: { countryCode: "CA", admin1: "Prince Edward Island" },
+  QC: { countryCode: "CA", admin1: "Quebec" },
+  SK: { countryCode: "CA", admin1: "Saskatchewan" },
+  YT: { countryCode: "CA", admin1: "Yukon" },
+}
+
+interface OpenMeteoPlace {
+  name: string
+  latitude: number
+  longitude: number
+  admin1?: string
+  country?: string
+  country_code?: string
+  population?: number
+}
 
 interface BirdImage {
   url: string
@@ -105,18 +181,39 @@ function corsHeaders(origin: string | null) {
 }
 
 async function geocode(city: string, state: string): Promise<{ lat: number; lng: number; displayName: string }> {
-  const query = encodeURIComponent(`${city}, ${state}, USA`)
-  const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`
+  const region = REGIONS[state]
+  if (!region) throw new Error(`Location not found: ${city}, ${state}`)
+
+  const url = new URL("https://geocoding-api.open-meteo.com/v1/search")
+  url.searchParams.set("name", city)
+  url.searchParams.set("count", "100")
+  url.searchParams.set("language", "en")
+  url.searchParams.set("format", "json")
+
   const res = await fetch(url, {
-    headers: { "User-Agent": "birds-portfolio/1.0" },
+    headers: {
+      "Accept": "application/json",
+      "User-Agent": "BirdsNearYou/1.0 (https://ruthstorm.github.io/birds/)",
+    },
   })
-  if (!res.ok) throw new Error("Geocoding request failed")
+  if (!res.ok) throw new Error(`Geocoding request failed: ${res.status}`)
+
   const data = await res.json()
-  if (!data.length) throw new Error(`Location not found: ${city}, ${state}`)
+  const matches = ((data?.results ?? []) as OpenMeteoPlace[])
+    .filter(
+      (place) =>
+        place.country_code === region.countryCode &&
+        place.admin1?.toLowerCase() === region.admin1.toLowerCase(),
+    )
+    .sort((a, b) => (b.population ?? 0) - (a.population ?? 0))
+
+  const place = matches[0]
+  if (!place) throw new Error(`Location not found: ${city}, ${state}`)
+
   return {
-    lat: parseFloat(data[0].lat),
-    lng: parseFloat(data[0].lon),
-    displayName: data[0].display_name,
+    lat: place.latitude,
+    lng: place.longitude,
+    displayName: [place.name, place.admin1, place.country].filter(Boolean).join(", "),
   }
 }
 
